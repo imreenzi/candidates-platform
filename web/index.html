@@ -1,80 +1,78 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Claw Candidates — Busca Nacional de Talentos</title>
+  <title>Jumpy™ — Talent Search</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Display:wght@400;700&family=Google+Sans+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="header">
-    <div class="header-inner">
-      <div class="logo-area">
-        <svg class="logo-icon" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-label="Claw">
-          <rect x="2" y="2" width="28" height="28" rx="6" stroke="currentColor" stroke-width="2"/>
-          <circle cx="11" cy="13" r="3" fill="currentColor"/>
-          <circle cx="21" cy="13" r="3" fill="currentColor"/>
-          <circle cx="16" cy="22" r="3" fill="currentColor"/>
-          <line x1="11" y1="13" x2="21" y2="13" stroke="currentColor" stroke-width="1.5"/>
-          <line x1="11" y1="13" x2="16" y2="22" stroke="currentColor" stroke-width="1.5"/>
-          <line x1="21" y1="13" x2="16" y2="22" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
-        <div>
-          <h1 class="logo-text">Claw Candidates</h1>
-          <p class="logo-sub">Busca Nacional de Talentos</p>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 2L16.5 16H3.5L10 2Z" fill="white" opacity="0.95"/>
+            <circle cx="10" cy="5" r="2" fill="white"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Jumpy™</span>
+          <span class="brand-powered">Powered by Studio Obliv™</span>
         </div>
       </div>
-      <div class="header-actions">
-        <span class="platform-badge">Powered by Apify</span>
-        <button class="theme-toggle" data-theme-toggle aria-label="Alternar tema">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+
+      <div class="topbar-center">
+        <nav class="source-nav">
+          <span class="source-tab source-tab--active">LinkedIn</span>
+          <span class="source-divider">·</span>
+          <span class="source-tab">Indeed</span>
+          <span class="source-divider">·</span>
+          <span class="source-tab">Catho</span>
+          <span class="source-divider">·</span>
+          <span class="source-tab">Vagas.com</span>
+        </nav>
+      </div>
+
+      <div class="topbar-right">
+        <div class="live-chip">
+          <span class="pulse-dot"></span>
+          <span>ONLINE</span>
+        </div>
+        <button class="icon-btn" data-theme-toggle aria-label="Alternar tema">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
       </div>
     </div>
   </header>
 
-  <main class="main">
+  <!-- App Shell -->
+  <div class="app-shell">
 
-    <!-- Search Panel -->
-    <section class="search-panel" id="searchPanel">
-      <div class="search-hero">
-        <h2 class="search-title">Encontre candidatos em qualquer nicho</h2>
-        <p class="search-sub">LinkedIn · Indeed · Catho · Vagas.com — cobertura nacional</p>
-      </div>
+    <!-- Sidebar -->
+    <aside class="sidebar">
 
-      <form class="search-form" id="searchForm" novalidate>
-        <div class="search-row">
-          <div class="search-field search-field--main">
-            <label class="field-label" for="queryInput">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              Cargo ou perfil
-            </label>
-            <input
-              type="text"
-              id="queryInput"
-              class="field-input"
-              placeholder="Ex: Ajudante Geral, Desenvolvedor React, Vendedor..."
-              autocomplete="off"
-              required
-            >
+      <!-- Search Panel -->
+      <section class="search-panel" id="searchPanel">
+        <div class="panel-heading">
+          <svg class="panel-heading-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          NOVA BUSCA
+        </div>
+
+        <form class="search-form" id="searchForm" novalidate>
+          <div class="form-field">
+            <label class="form-label" for="queryInput">Cargo ou Perfil</label>
+            <input type="text" id="queryInput" class="field-input" placeholder="Ex: Desenvolvedor React..." autocomplete="off" required>
           </div>
-          <div class="search-field">
-            <label class="field-label" for="locationInput">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-              Localização
-            </label>
-            <input
-              type="text"
-              id="locationInput"
-              class="field-input"
-              placeholder="Ex: Mauá, SP ou São Paulo, SP"
-              autocomplete="off"
-              list="locationSuggestions"
-              value=""
-            >
+
+          <div class="form-field">
+            <label class="form-label" for="locationInput">Localização</label>
+            <input type="text" id="locationInput" class="field-input" placeholder="Ex: São Paulo, SP" autocomplete="off" list="locationSuggestions" value="">
             <datalist id="locationSuggestions">
               <option value="São Paulo, SP">
               <option value="Rio de Janeiro, RJ">
@@ -97,19 +95,14 @@
               <option value="São José dos Campos, SP">
               <option value="Bauru, SP">
               <option value="Jundiaí, SP">
-              <option value="Piracicaba, SP">
               <option value="Santos, SP">
-              <option value="Diadema, SP">
-              <option value="Carapicuíba, SP">
-              <option value="Mogi das Cruzes, SP">
-              <option value="Sumaré, SP">
-              <option value="Betim, MG">
-              <option value="Contagem, MG">
-              <option value="Uberlândia, MG">
-              <option value="Juiz de Fora, MG">
-              <option value="Niterói, RJ">
-              <option value="Duque de Caxias, RJ">
-              <option value="Nova Iguaçu, RJ">
+              <option value="Florianópolis, SC">
+              <option value="Joinville, SC">
+              <option value="Blumenau, SC">
+              <option value="Londrina, PR">
+              <option value="Maringá, PR">
+              <option value="Caxias do Sul, RS">
+              <option value="Pelotas, RS">
               <option value="Belém, PA">
               <option value="Goiânia, GO">
               <option value="Maceió, AL">
@@ -118,187 +111,191 @@
               <option value="Campo Grande, MS">
               <option value="João Pessoa, PB">
               <option value="Aracaju, SE">
-              <option value="Porto Velho, RO">
               <option value="Cuiabá, MT">
-              <option value="Macapá, AP">
-              <option value="Rio Branco, AC">
-              <option value="Boa Vista, RR">
-              <option value="Palmas, TO">
-              <option value="Florianópolis, SC">
-              <option value="Joinville, SC">
-              <option value="Blumenau, SC">
-              <option value="Londrina, PR">
-              <option value="Maringá, PR">
-              <option value="Caxias do Sul, RS">
-              <option value="Pelotas, RS">
             </datalist>
           </div>
-        </div>
 
-        <!-- Platform Selector -->
-        <div class="platform-selector">
-          <span class="platform-label">Plataformas:</span>
-          <div class="platform-chips" id="platformChips">
-            <label class="chip chip--active">
-              <input type="checkbox" name="platform" value="google" checked>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              Google/LinkedIn
-            </label>
-            <label class="chip chip--active">
-              <input type="checkbox" name="platform" value="indeed" checked>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-              Indeed
-            </label>
-            <label class="chip chip--active">
-              <input type="checkbox" name="platform" value="catho" checked>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              Catho
-            </label>
-            <label class="chip">
-              <input type="checkbox" name="platform" value="vagas">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              Vagas.com
-            </label>
+          <div class="form-field">
+            <div class="form-label">Plataformas</div>
+            <div class="platform-chips" id="platformChips">
+              <label class="chip chip--active">
+                <input type="checkbox" name="platform" value="google" checked>
+                Google / LinkedIn
+              </label>
+              <label class="chip chip--active">
+                <input type="checkbox" name="platform" value="indeed" checked>
+                Indeed
+              </label>
+              <label class="chip chip--active">
+                <input type="checkbox" name="platform" value="catho" checked>
+                Catho
+              </label>
+              <label class="chip">
+                <input type="checkbox" name="platform" value="vagas">
+                Vagas.com
+              </label>
+            </div>
           </div>
 
-          <div class="limit-select">
-            <label class="field-label" for="limitSelect">Máximo</label>
-            <select id="limitSelect" class="field-select-small">
-              <option value="25">25</option>
-              <option value="50" selected>50</option>
-              <option value="75">75</option>
-              <option value="100">100</option>
+          <div class="form-field form-inline">
+            <label class="form-label" for="limitSelect">Máximo</label>
+            <select id="limitSelect" class="field-select-sm">
+              <option value="25">25 resultados</option>
+              <option value="50" selected>50 resultados</option>
+              <option value="75">75 resultados</option>
+              <option value="100">100 resultados</option>
             </select>
           </div>
-        </div>
 
-        <button type="submit" class="search-btn" id="searchBtn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          Buscar Candidatos
-        </button>
-      </form>
-    </section>
+          <button type="submit" class="search-btn" id="searchBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Buscar Candidatos
+          </button>
+        </form>
+      </section>
 
-    <!-- Progress -->
-    <div class="progress-panel" id="progressPanel" style="display:none;">
-      <div class="progress-inner">
-        <div class="progress-icon" id="progressIcon">
-          <svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-          </svg>
+      <!-- Filters -->
+      <div class="filters-section" id="filtersSection" style="display:none;">
+        <div class="panel-heading">
+          <svg class="panel-heading-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+          FILTROS
         </div>
-        <div class="progress-info">
-          <div class="progress-message" id="progressMessage">Iniciando busca...</div>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar" id="progressBar" style="width:0%"></div>
+        <div class="filter-wrap">
+          <div class="form-field">
+            <label class="form-label" for="searchInput">Buscar</label>
+            <input type="text" id="searchInput" class="field-input" placeholder="Nome, cargo ou empresa...">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Score mínimo — <span id="scoreValue" class="accent-val">0</span></label>
+            <input type="range" id="scoreFilter" class="filter-range" min="0" max="100" value="0" step="5">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="platformFilter">Plataforma</label>
+            <select id="platformFilter" class="field-select-sm"><option value="">Todas</option></select>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="sortBy">Ordenar por</label>
+            <select id="sortBy" class="field-select-sm">
+              <option value="score-desc">Score (maior)</option>
+              <option value="score-asc">Score (menor)</option>
+              <option value="name-asc">Nome (A-Z)</option>
+              <option value="name-desc">Nome (Z-A)</option>
+            </select>
+          </div>
+          <button class="clear-btn" id="clearFilters">Limpar Filtros</button>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="coverage">
+          <span class="coverage-dot"></span>
+          Cobertura nacional · 27 estados
+        </div>
+      </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="content-area">
+
+      <!-- Welcome State -->
+      <div class="welcome-state" id="initialState">
+        <div class="welcome-inner">
+          <div class="map-wrap">
+            <svg class="brazil-map" viewBox="0 0 400 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M 50,78 L 78,52 L 118,42 L 162,50 L 200,44 L 238,52 L 278,46 L 318,62 L 345,78 L 368,100 L 378,126 L 370,150 L 356,168 L 362,192 L 368,216 L 358,238 L 342,256 L 328,278 L 322,302 L 308,322 L 292,340 L 274,358 L 254,374 L 233,390 L 212,406 L 192,420 L 172,434 L 152,446 L 134,450 L 116,440 L 100,422 L 85,402 L 70,378 L 56,350 L 44,320 L 38,290 L 36,260 L 40,230 L 46,202 L 43,175 L 40,148 L 44,122 L 48,98 Z" stroke="currentColor" stroke-width="1.5" fill="rgba(14,165,233,0.04)" stroke-linejoin="round"/>
+              <circle cx="234" cy="325" r="2.5" fill="rgba(14,165,233,0.6)"/>
+              <circle cx="264" cy="302" r="2" fill="rgba(14,165,233,0.5)"/>
+              <circle cx="338" cy="196" r="2" fill="rgba(14,165,233,0.4)"/>
+              <circle cx="308" cy="168" r="2" fill="rgba(14,165,233,0.4)"/>
+              <circle cx="186" cy="256" r="2" fill="rgba(14,165,233,0.4)"/>
+              <circle cx="158" cy="416" r="2" fill="rgba(14,165,233,0.4)"/>
+              <circle cx="84"  cy="130" r="2" fill="rgba(14,165,233,0.35)"/>
+              <circle cx="200" cy="96"  r="2" fill="rgba(14,165,233,0.35)"/>
+              <circle cx="284" cy="282" r="2" fill="rgba(14,165,233,0.4)"/>
+              <circle cx="200" cy="260" r="20" fill="rgba(14,165,233,0.08)" class="map-ping"/>
+              <circle cx="200" cy="260" r="12" fill="rgba(14,165,233,0.12)"/>
+              <circle cx="200" cy="260" r="6"  fill="rgba(14,165,233,0.5)"/>
+              <circle cx="200" cy="260" r="3"  fill="#0ea5e9"/>
+            </svg>
+          </div>
+          <div class="welcome-copy">
+            <div class="welcome-label">BUSCA NACIONAL DE TALENTOS</div>
+            <h2 class="welcome-title">Encontre os melhores<br>candidatos do Brasil</h2>
+            <p class="welcome-desc">LinkedIn · Indeed · Catho · Vagas.com<br>Cobertura em 27 estados</p>
+          </div>
+          <div class="source-badges">
+            <div class="source-badge"><div class="source-badge-name">LinkedIn</div><div class="source-badge-tag">PROFESSIONAL</div></div>
+            <div class="source-badge"><div class="source-badge-name">Indeed</div><div class="source-badge-tag">MASS MARKET</div></div>
+            <div class="source-badge"><div class="source-badge-name">Catho</div><div class="source-badge-tag">BRASILEIRO</div></div>
+            <div class="source-badge"><div class="source-badge-name">Vagas</div><div class="source-badge-tag">LOCAL</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-panel" id="progressPanel" style="display:none;">
+        <div class="progress-inner">
+          <div class="progress-icon" id="progressIcon">
+            <svg class="spin" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          </div>
+          <div class="progress-info">
+            <div class="progress-message" id="progressMessage">Iniciando busca...</div>
+            <div class="progress-track"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
           </div>
           <div class="progress-pct" id="progressPct">0%</div>
         </div>
       </div>
-    </div>
 
-    <!-- Results Header -->
-    <div class="results-header" id="resultsHeader" style="display:none;">
-      <div class="results-meta">
-        <h3 class="results-title" id="resultsTitle">Resultados</h3>
-        <p class="results-sub" id="resultsSub"></p>
+      <!-- Stats -->
+      <div class="stats-bar" id="statsBar" style="display:none;">
+        <div class="stat-card"><span class="stat-value" id="totalCount">0</span><span class="stat-label">Total</span></div>
+        <div class="stat-card"><span class="stat-value" id="filteredCount">0</span><span class="stat-label">Filtrados</span></div>
+        <div class="stat-card"><span class="stat-value" id="avgScore">—</span><span class="stat-label">Score Médio</span></div>
+        <div class="stat-card"><span class="stat-value" id="topScore">—</span><span class="stat-label">Top Score</span></div>
       </div>
-      <div class="results-actions">
-        <button class="action-btn" id="exportCsvBtn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Exportar CSV
-        </button>
-        <button class="action-btn action-btn--secondary" id="newSearchBtn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          Nova Busca
-        </button>
-      </div>
-    </div>
 
-    <!-- Stats Bar -->
-    <div class="stats-bar" id="statsBar" style="display:none;">
-      <div class="stat">
-        <span class="stat-value" id="totalCount">0</span>
-        <span class="stat-label">Total</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value" id="filteredCount">0</span>
-        <span class="stat-label">Filtrados</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value" id="avgScore">—</span>
-        <span class="stat-label">Pontuação Média</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value" id="topScore">—</span>
-        <span class="stat-label">Maior Pontuação</span>
-      </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="filters-section" id="filtersSection" style="display:none;">
-      <div class="filters-row">
-        <div class="filter-group">
-          <label class="filter-label" for="searchInput">Buscar</label>
-          <input type="text" id="searchInput" class="filter-input" placeholder="Nome, cargo ou empresa...">
+      <!-- Results Header -->
+      <div class="results-header" id="resultsHeader" style="display:none;">
+        <div class="results-meta">
+          <h3 class="results-title" id="resultsTitle">Resultados</h3>
+          <p class="results-sub" id="resultsSub"></p>
         </div>
-        <div class="filter-group">
-          <label class="filter-label" for="scoreFilter">Pontuação Mínima</label>
-          <div class="range-wrapper">
-            <input type="range" id="scoreFilter" class="filter-range" min="0" max="100" value="0" step="5">
-            <span class="range-value" id="scoreValue">0</span>
-          </div>
-        </div>
-        <div class="filter-group">
-          <label class="filter-label" for="platformFilter">Plataforma</label>
-          <select id="platformFilter" class="filter-select">
-            <option value="">Todas</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label class="filter-label" for="sortBy">Ordenar por</label>
-          <select id="sortBy" class="filter-select">
-            <option value="score-desc">Relevância (maior)</option>
-            <option value="score-asc">Relevância (menor)</option>
-            <option value="name-asc">Nome (A-Z)</option>
-            <option value="name-desc">Nome (Z-A)</option>
-          </select>
+        <div class="results-actions">
+          <button class="action-btn" id="exportCsvBtn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar CSV
+          </button>
+          <button class="action-btn action-btn--accent" id="newSearchBtn">Nova Busca</button>
         </div>
       </div>
-      <button class="clear-btn" id="clearFilters">Limpar Filtros</button>
-    </div>
 
-    <!-- Table -->
-    <div class="table-container" id="tableContainer" style="display:none;">
-      <table class="candidates-table">
-        <thead>
-          <tr>
-            <th class="th-rank">#</th>
-            <th class="th-name sortable" data-sort="name">Nome</th>
-            <th class="th-title">Cargo</th>
-            <th class="th-company sortable" data-sort="company">Empresa</th>
-            <th class="th-location sortable" data-sort="location">Localização</th>
-            <th class="th-platform">Plataforma</th>
-            <th class="th-score sortable" data-sort="score">Score</th>
-            <th class="th-profile">Perfil</th>
-          </tr>
-        </thead>
-        <tbody id="candidatesBody"></tbody>
-      </table>
-    </div>
+      <!-- Table -->
+      <div class="table-container" id="tableContainer" style="display:none;">
+        <table class="candidates-table">
+          <thead>
+            <tr>
+              <th class="th-rank">#</th>
+              <th class="th-name sortable" data-sort="name">Nome</th>
+              <th class="th-title">Cargo</th>
+              <th class="th-company sortable" data-sort="company">Empresa</th>
+              <th class="th-location sortable" data-sort="location">Localização</th>
+              <th class="th-platform">Plataforma</th>
+              <th class="th-score sortable" data-sort="score">Score</th>
+              <th class="th-profile">Perfil</th>
+            </tr>
+          </thead>
+          <tbody id="candidatesBody"></tbody>
+        </table>
+      </div>
 
-    <div class="empty-state" id="emptyState" style="display:none;">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
-      <p>Nenhum candidato encontrado com os filtros atuais.</p>
-    </div>
+      <!-- Empty -->
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <p>Nenhum candidato encontrado com os filtros atuais.</p>
+      </div>
 
-  </main>
-
-  <footer class="footer">
-    <p>Claw Candidates — Dados coletados via Apify (LinkedIn · Indeed · Catho · Vagas.com)</p>
-  </footer>
+    </main>
+  </div>
 
   <script src="app.js"></script>
 </body>
