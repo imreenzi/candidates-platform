@@ -4,12 +4,10 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
   ? 'http://localhost:3001'
   : '';  // same origin in production
 
-// State
 let allCandidates = [];
 let currentJobId = null;
 let eventSource = null;
 
-// DOM refs
 const initialState  = document.getElementById('initialState');
 const searchPanel   = document.getElementById('searchPanel');
 const searchForm    = document.getElementById('searchForm');
@@ -47,7 +45,6 @@ const clearFilters   = document.getElementById('clearFilters');
 const exportCsvBtn   = document.getElementById('exportCsvBtn');
 const newSearchBtn   = document.getElementById('newSearchBtn');
 
-// ─── Theme Toggle ────────────────────────────────────────────────────────────
 (function () {
   const toggle = document.querySelector('[data-theme-toggle]');
   const root = document.documentElement;
@@ -68,14 +65,12 @@ const newSearchBtn   = document.getElementById('newSearchBtn');
   }
 })();
 
-// ─── Platform chip interactivity ─────────────────────────────────────────────
 document.querySelectorAll('.chip').forEach(chip => {
   chip.addEventListener('change', () => {
     chip.classList.toggle('chip--active', chip.querySelector('input').checked);
   });
 });
 
-// ─── Search Form ─────────────────────────────────────────────────────────────
 searchForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -194,7 +189,6 @@ async function loadResults(jobId, query, location) {
   }
 }
 
-// ─── Results Rendering ────────────────────────────────────────────────────────
 function renderResults(query, location, total) {
   searchBtn.disabled = false;
 
@@ -207,7 +201,7 @@ function renderResults(query, location, total) {
     platformFilter.appendChild(opt);
   });
 
-  resultsTitle.textContent = `"${query}"`;
+  resultsTitle.textContent = `Candidatos para "${query}"`;
   resultsSub.textContent = `${location} · ${total} encontrados`;
 
   setSection('results');
@@ -215,10 +209,10 @@ function renderResults(query, location, total) {
 }
 
 function render() {
-  const search   = searchInput.value.toLowerCase().trim();
+  const search  = searchInput.value.toLowerCase().trim();
   const minScore = parseInt(scoreFilter.value);
   const platform = platformFilter.value;
-  const sort     = sortBy.value;
+  const sort    = sortBy.value;
 
   let filtered = allCandidates.filter(c => {
     if (search && !c.name?.toLowerCase().includes(search) &&
@@ -229,18 +223,17 @@ function render() {
     return true;
   });
 
-  // Sort
   const [field, dir] = sort.split('-');
   filtered.sort((a, b) => {
     let cmp = 0;
-    if      (field === 'score')   cmp = (a.score || 0) - (b.score || 0);
-    else if (field === 'name')    cmp = (a.name || '').localeCompare(b.name || '', 'pt-BR');
-    else if (field === 'company') cmp = (a.company || '').localeCompare(b.company || '', 'pt-BR');
+    if      (field === 'score')    cmp = (a.score || 0) - (b.score || 0);
+    else if (field === 'name')     cmp = (a.name || '').localeCompare(b.name || '', 'pt-BR');
+    else if (field === 'company')  cmp = (a.company || '').localeCompare(b.company || '', 'pt-BR');
+    else if (field === 'location') cmp = (a.location || '').localeCompare(b.location || '', 'pt-BR');
     return dir === 'desc' ? -cmp : cmp;
   });
 
-  // Stats
-  totalCount.textContent    = allCandidates.length;
+  totalCount.textContent = allCandidates.length;
   filteredCount.textContent = filtered.length;
   if (filtered.length > 0) {
     const scores = filtered.map(c => c.score || 0);
@@ -260,75 +253,66 @@ function render() {
   tableContainer.style.display = 'block';
   emptyState.style.display = 'none';
 
-  // Compact 4-column list
   candidatesBody.innerHTML = filtered.map((c, i) => `
     <tr>
-      <td class="cl-rank">${i + 1}</td>
-      <td class="cl-main">
-        <div class="cl-name">${esc(c.name)}</div>
-        <div class="cl-sub">${[c.title, c.company].filter(Boolean).map(esc).join(' · ')}</div>
+      <td class="td-rank">${i + 1}</td>
+      <td class="td-name">${esc(c.name)}</td>
+      <td class="td-title" title="${esc(c.title)}">${esc(c.title)}</td>
+      <td class="td-company" title="${esc(c.company)}">${esc(c.company)}</td>
+      <td class="td-location">${esc(c.location)}</td>
+      <td class="td-platform">
+        <span class="platform-tag platform-tag--${esc(c.platform)}">${platformLabel(c.platform)}</span>
       </td>
-      <td class="cl-score">
+      <td class="td-score">
         <span class="score-badge ${scoreClass(c.score)}">${c.score || 0}</span>
       </td>
-      <td class="cl-link">
+      <td class="td-profile">
         ${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener" class="profile-link" title="Ver perfil">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
             <polyline points="15 3 21 3 21 9"/>
             <line x1="10" y1="14" x2="21" y2="3"/>
           </svg>
-        </a>` : ''}
+        </a>` : '<span style="color:var(--text-faint);font-size:12px">—</span>'}
       </td>
     </tr>
   `).join('');
 }
 
-// ─── UI Helpers ───────────────────────────────────────────────────────────────
 function setSection(section) {
-  const coverageCard = document.getElementById('coverageCard');
-  const locationCard = document.getElementById('locationCard');
-
-  progressPanel.style.display  = section === 'progress' ? 'flex'  : 'none';
+  progressPanel.style.display  = section === 'progress' ? 'block' : 'none';
   resultsHeader.style.display  = section === 'results'  ? 'flex'  : 'none';
-  statsBar.style.display       = section === 'results'  ? 'block' : 'none';
+  statsBar.style.display       = section === 'results'  ? 'grid'  : 'none';
   filtersSection.style.display = section === 'results'  ? 'block' : 'none';
 
   if (section === 'results') {
     tableContainer.style.display = 'block';
-    if (initialState)   initialState.style.display   = 'none';
-    if (coverageCard)   coverageCard.style.display    = 'none';
-    if (locationCard)   locationCard.style.display    = 'none';
+    if (initialState) initialState.style.display = 'none';
   } else if (section === 'progress') {
     tableContainer.style.display = 'none';
-    emptyState.style.display     = 'none';
-    if (initialState)   initialState.style.display   = 'none';
-    if (coverageCard)   coverageCard.style.display    = 'block';
-    if (locationCard)   locationCard.style.display    = 'block';
+    emptyState.style.display = 'none';
+    if (initialState) initialState.style.display = 'none';
   } else {
-    // 'search' — welcome state
     tableContainer.style.display = 'none';
-    emptyState.style.display     = 'none';
-    if (initialState)   initialState.style.display   = 'flex';
-    if (coverageCard)   coverageCard.style.display    = 'block';
-    if (locationCard)   locationCard.style.display    = 'block';
+    emptyState.style.display = 'none';
+    if (initialState) initialState.style.display = 'flex';
   }
 }
 
 function setProgress(pct, msg) {
-  progressBar.style.width       = pct + '%';
-  progressMessage.textContent   = msg;
-  progressPct.textContent       = pct + '%';
+  progressBar.style.width = pct + '%';
+  progressMessage.textContent = msg;
+  progressPct.textContent = pct + '%';
 
   if (pct >= 100) {
-    progressIcon.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--score-high)" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>`;
+    progressIcon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--score-high)" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>`;
   }
 }
 
 function showError(msg) {
-  progressIcon.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--score-low)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
-  progressMessage.textContent   = 'Erro: ' + msg;
-  progressMessage.style.color   = 'var(--score-low)';
+  progressIcon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--score-low)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+  progressMessage.textContent = 'Erro: ' + msg;
+  progressMessage.style.color = 'var(--score-low)';
 }
 
 function scoreClass(score) {
@@ -338,12 +322,7 @@ function scoreClass(score) {
 }
 
 function platformLabel(p) {
-  const labels = {
-    catho: 'Catho', vagas: 'Vagas.com', indeed: 'Indeed',
-    curriculos: 'Currículos', curriculo: 'Currículos',
-    facebook: 'Facebook', instagram: 'Instagram',
-    linkedin: 'LinkedIn', google: 'Google',
-  };
+  const labels = { catho: 'Catho', vagas: 'Vagas.com', indeed: 'Indeed', curriculos: 'Currículos', curriculo: 'Currículos', linkedin: 'LinkedIn', google: 'Google', facebook: 'Facebook', instagram: 'Instagram' };
   return labels[p] || p || '—';
 }
 
@@ -353,7 +332,6 @@ function esc(str) {
   return div.innerHTML;
 }
 
-// ─── Filter Events ────────────────────────────────────────────────────────────
 searchInput.addEventListener('input', render);
 scoreFilter.addEventListener('input', () => { scoreValue.textContent = scoreFilter.value; render(); });
 platformFilter.addEventListener('change', render);
@@ -367,32 +345,27 @@ clearFilters.addEventListener('click', () => {
   render();
 });
 
-// Column header sorting
 document.querySelectorAll('th.sortable').forEach(th => {
   th.addEventListener('click', () => {
     const field = th.dataset.sort;
     const [cur, dir] = sortBy.value.split('-');
-    sortBy.value = cur === field
-      ? `${field}-${dir === 'asc' ? 'desc' : 'asc'}`
-      : (field === 'score' ? `${field}-desc` : `${field}-asc`);
+    sortBy.value = cur === field ? `${field}-${dir === 'asc' ? 'desc' : 'asc'}` : (field === 'score' ? `${field}-desc` : `${field}-asc`);
     render();
   });
 });
 
-// ─── Export ───────────────────────────────────────────────────────────────────
 exportCsvBtn.addEventListener('click', () => {
   if (!currentJobId) return;
   window.open(`${API_BASE}/api/export/${currentJobId}?format=csv`, '_blank');
 });
 
-// ─── New Search ───────────────────────────────────────────────────────────────
 newSearchBtn.addEventListener('click', () => {
   if (eventSource) eventSource.close();
   allCandidates = [];
-  currentJobId  = null;
+  currentJobId = null;
   searchBtn.disabled = false;
   progressMessage.style.color = '';
-  progressIcon.innerHTML = `<svg class="spin" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`;
+  progressIcon.innerHTML = `<svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`;
   setSection('search');
   queryInput.focus();
 });
