@@ -3,6 +3,7 @@
  *
  * Estratégia unificada de custo mínimo:
  *   Google Search actor cobre LinkedIn, Catho, Indeed via queries específicas.
+ *   Uma chamada por plataforma = custo ~$0.001 por query.
  */
 
 import { searchGooglePeople } from './google-people.js';
@@ -42,12 +43,15 @@ function detectCategory(query) {
   return 'general';
 }
 
+/**
+ * Plataformas por categoria (ordem de relevância)
+ */
 const CATEGORY_PLATFORMS = {
-  blue_collar: ['linkedin', 'catho', 'indeed'],
-  tech:        ['linkedin'],
-  professional:['linkedin', 'catho'],
-  commercial:  ['linkedin', 'catho', 'indeed'],
-  general:     ['linkedin', 'catho', 'indeed'],
+  blue_collar: ['google', 'catho', 'indeed'],
+  tech:        ['google', 'linkedin'],
+  professional:['google', 'linkedin', 'catho'],
+  commercial:  ['google', 'catho', 'indeed'],
+  general:     ['google', 'catho', 'indeed'],
 };
 
 function dedup(candidates) {
@@ -64,53 +68,60 @@ export async function orchestrateSearch(query, location, requestedPlatforms, lim
   const category = detectCategory(query);
   const allCandidates = [];
 
+  // Determina quais plataformas usar
   const platformPriority = CATEGORY_PLATFORMS[category] || CATEGORY_PLATFORMS.general;
   const activePlatforms = requestedPlatforms.length
-    ? platformPriority.filter(p => requestedPlatforms.includes(p) || requestedPlatforms.includes('google') || requestedPlatforms.includes('all'))
+    ? platformPriority.filter(p => requestedPlatforms.includes(p) || requestedPlatforms.includes('all'))
     : platformPriority;
 
-  onProgress(5, `Categoria: ${category} — plataformas: ${activePlatforms.join(', ')}`);
+  // Se "google" está ativo, cobre linkedin também
+  const effectivePlatforms = activePlatforms.includes('google') && !activePlatforms.includes('linkedin')
+    ? [...activePlatforms, 'linkedin']
+    : activePlatforms;
 
-  // LinkedIn
-  if (activePlatforms.includes('linkedin') || requestedPlatforms.includes('google')) {
-    onProgress(15, 'Buscando perfis LinkedIn...');
+  onProgress(5, `Detectado: ${category} — buscando em ${effectivePlatforms.length} plataformas...`);
+
+  // Busca paralela em grupos de plataformas
+  // LinkedIn via Google
+  if (effectivePlatforms.some(p => ['google', 'linkedin'].includes(p))) {
+    onProgress(15, 'Buscando perfis LinkedIn via Google...');
     try {
       const results = await searchGooglePeople(query, location, Math.ceil(limit * 0.5), ['linkedin']);
       allCandidates.push(...results);
-      onProgress(40, `${results.length} perfis LinkedIn encontrados`);
+      onProgress(35, `${results.length} perfis LinkedIn encontrados`);
     } catch (err) {
-      console.error('[orchestrator] LinkedIn error:', err.message);
-      onProgress(40, 'LinkedIn: erro, continuando...');
+      console.error('[orchestrator] LinkedIn/Google error:', err.message);
+      onProgress(35, 'LinkedIn: erro, continuando...');
     }
   }
 
-  // Catho
-  if (activePlatforms.includes('catho') || requestedPlatforms.includes('catho')) {
-    onProgress(50, 'Buscando perfis Catho...');
+  // Catho via Google
+  if (effectivePlatforms.includes('catho')) {
+    onProgress(45, 'Buscando perfis Catho...');
     try {
       const results = await searchGooglePeople(query, location, Math.ceil(limit * 0.3), ['catho']);
       allCandidates.push(...results);
-      onProgress(70, `${results.length} perfis Catho encontrados`);
+      onProgress(65, `${results.length} perfis Catho encontrados`);
     } catch (err) {
       console.error('[orchestrator] Catho error:', err.message);
-      onProgress(70, 'Catho: erro, continuando...');
+      onProgress(65, 'Catho: erro, continuando...');
     }
   }
 
-  // Indeed
-  if (activePlatforms.includes('indeed') || requestedPlatforms.includes('indeed')) {
-    onProgress(75, 'Buscando perfis Indeed...');
+  // Indeed via Google
+  if (effectivePlatforms.includes('indeed')) {
+    onProgress(70, 'Buscando perfis Indeed...');
     try {
       const results = await searchGooglePeople(query, location, Math.ceil(limit * 0.3), ['indeed']);
       allCandidates.push(...results);
-      onProgress(88, `${results.length} perfis Indeed encontrados`);
+      onProgress(85, `${results.length} perfis Indeed encontrados`);
     } catch (err) {
       console.error('[orchestrator] Indeed error:', err.message);
-      onProgress(88, 'Indeed: erro, continuando...');
+      onProgress(85, 'Indeed: erro, continuando...');
     }
   }
 
-  onProgress(92, 'Deduplicando e pontuando...');
+  onProgress(90, 'Deduplicando e pontuando candidatos...');
   const deduped = dedup(allCandidates);
   const ranked = scoreAndRank(deduped, query, location);
 
