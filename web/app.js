@@ -89,7 +89,7 @@ searchForm.addEventListener('submit', async (e) => {
   }
 
   const platforms = [...document.querySelectorAll('input[name="platform"]:checked')].map(el => el.value);
-  if (!platforms.length) platforms.push('google', 'indeed');
+  if (!platforms.length) platforms.push('catho', 'vagas');
   const limit = parseInt(limitSelect.value) || 50;
   await startSearch(query, location, platforms, limit);
 });
@@ -205,7 +205,7 @@ function render() {
   let filtered = allCandidates.filter(c => {
     if (search && !c.name?.toLowerCase().includes(search) &&
         !c.title?.toLowerCase().includes(search) &&
-        !c.company?.toLowerCase().includes(search)) return false;
+        !c.email?.toLowerCase().includes(search)) return false;
     if (c.score < minScore) return false;
     if (platform && c.platform !== platform) return false;
     return true;
@@ -214,10 +214,8 @@ function render() {
   const [field, dir] = sort.split('-');
   filtered.sort((a, b) => {
     let cmp = 0;
-    if      (field === 'score')    cmp = (a.score || 0) - (b.score || 0);
-    else if (field === 'name')     cmp = (a.name || '').localeCompare(b.name || '', 'pt-BR');
-    else if (field === 'company')  cmp = (a.company || '').localeCompare(b.company || '', 'pt-BR');
-    else if (field === 'location') cmp = (a.location || '').localeCompare(b.location || '', 'pt-BR');
+    if      (field === 'score') cmp = (a.score || 0) - (b.score || 0);
+    else if (field === 'name')  cmp = (a.name || '').localeCompare(b.name || '', 'pt-BR');
     return dir === 'desc' ? -cmp : cmp;
   });
 
@@ -241,18 +239,27 @@ function render() {
   tableContainer.style.display = 'block';
   emptyState.style.display = 'none';
 
-  candidatesBody.innerHTML = filtered.map((c, i) => `
-    <tr>
+  candidatesBody.innerHTML = filtered.map((c, i) => {
+    const emailCell = c.email
+      ? `<a href="mailto:${esc(c.email)}" class="contact-link">${esc(c.email)}</a>`
+      : '<span class="no-data">—</span>';
+    const phoneCell = c.phone
+      ? `<a href="tel:${esc(c.phone)}" class="contact-link">${esc(c.phone)}</a>`
+      : '<span class="no-data">—</span>';
+    const profileCell = c.url
+      ? `<a href="${esc(c.url)}" target="_blank" rel="noopener" class="profile-link" title="Ver perfil"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`
+      : '<span class="no-data" style="display:block;text-align:center">—</span>';
+    return `<tr>
       <td class="td-rank">${i + 1}</td>
       <td class="td-name">${esc(c.name)}</td>
-      <td class="td-title" title="${esc(c.title)}">${esc(c.title)}</td>
-      <td class="td-company" title="${esc(c.company)}">${esc(c.company)}</td>
-      <td class="td-location">${esc(c.location)}</td>
-      <td class="td-platform"><span class="platform-tag platform-tag--${esc(c.platform)}">${platformLabel(c.platform)}</span></td>
+      <td class="td-title">${esc(c.title) || '<span class="no-data">—</span>'}</td>
+      <td class="td-city">${esc(c.location) || '<span class="no-data">—</span>'}</td>
+      <td class="td-email">${emailCell}</td>
+      <td class="td-phone">${phoneCell}</td>
       <td class="td-score"><span class="score-badge ${scoreClass(c.score)}">${c.score || 0}</span></td>
-      <td class="td-profile">${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener" class="profile-link" title="Ver perfil"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>` : '<span style="color:var(--text-faint);font-size:12px">—</span>'}</td>
-    </tr>
-  `).join('');
+      <td class="td-profile">${profileCell}</td>
+    </tr>`;
+  }).join('');
 }
 
 // Section Control
@@ -298,7 +305,7 @@ function scoreClass(score) {
 }
 
 function platformLabel(p) {
-  const labels = { linkedin: 'LinkedIn', indeed: 'Indeed', catho: 'Catho', vagas: 'Vagas', google: 'Google' };
+  const labels = { catho: 'Catho', vagas: 'Vagas.com', indeed: 'Indeed', curriculo: 'Currículo', curriculos: 'Currículos', google: 'Google' };
   return labels[p] || p || '—';
 }
 

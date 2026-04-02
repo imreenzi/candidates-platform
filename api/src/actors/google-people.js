@@ -1,122 +1,153 @@
 /**
- * Google Search Actor — busca candidatos via Google SERP
+ * Google Search Actor — busca candidatos ATIVOS buscando emprego
  *
- * Actor: nFJndFXA5zjCTuudP (~$0.001 per 10 results)
- * Estratégia unificada: usar Google para encontrar perfis em TODAS as plataformas.
- *
- * Queries por plataforma:
- *   LinkedIn: site:linkedin.com/in "cargo" "cidade"
- *   Catho:    site:catho.com.br "cargo" "cidade"
- *   Indeed:   site:br.indeed.com/r "cargo" "cidade"
+ * Foca em: Catho, Vagas.com, Indeed resumes, currículos públicos
+ * Extrai: email e telefone quando disponível no snippet do Google
  */
 
 import { ApifyClient } from 'apify-client';
 
 const client = new ApifyClient({ token: process.env.APIFY_TOKEN });
 
-/**
- * Detecta plataforma e extrai dados do resultado Google
- */
-function parseGoogleResult(item) {
+// ─── Extractors ─────────────────────────────────────────────────────────────────────────────
+
+const EMAIL_RE = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,4}/;
+const PHONE_RE = /(?:\+?55[\s-]?)?(?:\(?\d{2}\)?[\s-]?)(?:9[\s-]?)?\d{4}[\s-]?\d{4}/;
+
+function extractEmail(text) {
+  const m = (text || '').match(EMAIL_RE);
+  return m ? m[0].toLowerCase() : null;
+}
+
+function extractPhone(text) {
+  const m = (text || '').match(PHONE_RE);
+  if (!m) return null;
+  const digits = m[0].replace(/\D/g, '');
+  if (digits.length < 8 || digits.length > 13) return null;
+  return m[0].trim();
+}
+
+function extractLocation(text) {
+  const m = (text || '').match(/([A-ZÀ-Ú][a-zà-ú]+(?:\s+[A-ZÀ-Ú][a-zà-ú]+)*),\s*((?:São Paulo|Rio de Janeiro|Minas Gerais|Bahia|Paraná|Rio Grande do Sul|Santa Catarina|Goiás|Pernambuco|Ceará|Pará|Amazonas|Maranhão|Mato Grosso|Espírito Santo|Rio Grande do Norte|Alagoas|Sergipe|Piauí|Tocantins|Rondônia|Acre|Amapá|Roraima|Distrito Federal|SP|RJ|MG|BA|PR|RS|SC|GO|PE|CE|PA|AM|MA|MS|MT|ES|RN|AL|SE|PI|TO|RO|AC|AP|RR|DF))/);
+  return m ? `${m[1]}, ${m[2]}` : null;
+}
+
+function nameFromSlug(url) {
+  const segments = (url || '').replace(/https?:\/\/[^/]+/, '').split('/').filter(Boolean);
+  for (const seg of segments) {
+    const clean = seg
+      .replace(/[-_]\d{4,}$/, '')
+      .replace(/\.\w+$/, '');
+    const parts = clean.split(/[-_]/).filter(p => p.length > 1 && !/^\d+$/.test(p));
+    if (parts.length >= 2 && parts.length <= 5 && parts[0].length > 1) {
+      return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
+    }
+  }
+  return '';
+}
+
+// ─── Parsers by platform ────────────────────────────────────────────────────────────────────────
+
+function parseResult(item) {
   const { title = '', url = '', description = '' } = item;
   if (!url || !title) return null;
 
-  // LinkedIn
-  if (url.includes('linkedin.com/in/')) {
-    return parseLinkedIn(title, url, description);
-  }
+  const combined = title + ' ' + description;
+  const email = extractEmail(combined);
+  const phone = extractPhone(description);
 
-  // Catho
-  if (url.includes('catho.com.br')) {
-    return parseCatho(title, url, description);
-  }
+  if (url.includes('catho.com.br'))                return parseCatho(title, url, description, email, phone);
+  if (url.includes('vagas.com.br'))                return parseVagas(title, url, description, email, phone);
+  if (url.includes('indeed.com'))                   return parseIndeed(title, url, description, email, phone);
+  if (url.includes('curriculum.com.br') ||
+      url.includes('curriculo.') ||
+      url.includes('meucurriculo.') ||
+      url.includes('curriculos.'))                  return parseCurriculum(title, url, description, email, phone);
 
-  // Indeed (perfis/currículos)
-  if (url.includes('indeed.com') || url.includes('br.indeed.com')) {
-    return parseIndeed(title, url, description);
-  }
+  // Accept any result that has contact info
+  if (email || phone) return parseGeneric(title, url, description, email, phone);
 
   return null;
 }
 
-function parseLinkedIn(title, url, description) {
-  // "João Silva - Ajudante Geral - ABC Corp | LinkedIn"
-  const clean = title.replace(/\s*\|\s*linkedin$/i, '').trim();
-  const parts = clean.split(/\s*[-–]\s*/);
-  const name = parts[0]?.trim() || '';
-  const jobTitle = parts[1]?.trim() || '';
-
-  // Company from "at Company" in snippet
-  let company = 'Não informado';
-  const atMatch = description.match(/\bat\s+([^.]+)/i);
-  if (atMatch) company = atMatch[1].trim().replace(/\.$/, '');
-
-  // Location from snippet
-  const location = extractLocation(description) || 'Brasil';
-
-  if (!name || name.length < 3) return null;
-  return { name, title: jobTitle, company, location, url, platform: 'linkedin', source: 'google-search' };
-}
-
-function parseCatho(title, url, description) {
-  // "João Silva - Ajudante Geral em Mauá - Catho"
-  const clean = title.replace(/\s*[-–]\s*catho$/i, '').replace(/\s*\|\s*catho$/i, '').trim();
-  const parts = clean.split(/\s*[-–]\s*/);
-  const name = parts[0]?.trim() || '';
+function parseCatho(title, url, description, email, phone) {
+  const clean = title.replace(/\s*[-–|]\s*catho.*$/i, '').trim();
+  const parts = clean.split(/\s*[-–]\s+/);
+  const name = parts[0]?.trim() || nameFromSlug(url);
   const jobTitle = (parts[1] || '').replace(/\s+em\s+.+$/, '').trim();
   const location = extractLocation(title + ' ' + description) || 'Brasil';
-
   if (!name || name.length < 3) return null;
-  return { name, title: jobTitle, company: 'Não informado', location, url, platform: 'catho', source: 'google-search' };
+  return { name, title: jobTitle, company: '', location, email, phone, url, platform: 'catho', source: 'google-search' };
 }
 
-function parseIndeed(title, url, description) {
-  // "João Silva - Ajudante Geral - Mauá, SP - Indeed"
-  const clean = title.replace(/\s*[-–]\s*indeed$/i, '').replace(/\s*\|\s*indeed$/i, '').trim();
-  const parts = clean.split(/\s*[-–]\s*/);
-  const name = parts[0]?.trim() || '';
-  const jobTitle = parts[1]?.trim() || '';
+function parseVagas(title, url, description, email, phone) {
+  const clean = title.replace(/\s*[-–|]\s*vagas\.com.*$/i, '').trim();
+  const parts = clean.split(/\s*[-–]\s+/);
+  const name = parts[0]?.trim() || nameFromSlug(url);
+  const jobTitle = (parts[1] || '').trim();
   const location = extractLocation(title + ' ' + description) || 'Brasil';
-
   if (!name || name.length < 3) return null;
-  return { name, title: jobTitle, company: 'Não informado', location, url, platform: 'indeed', source: 'google-search' };
+  return { name, title: jobTitle, company: '', location, email, phone, url, platform: 'vagas', source: 'google-search' };
 }
 
-function extractLocation(text) {
-  // Matches "Cidade, SP" or "São Paulo, SP, Brasil" patterns
-  const m = text.match(/([A-ZÀ-Ú][a-zà-ú]+(?:\s+[A-ZÀ-Ú][a-zà-ú]+)*),\s*((?:São Paulo|Rio de Janeiro|Minas Gerais|Bahia|Paraná|Rio Grande do Sul|Santa Catarina|Goiás|Pernambuco|Ceará|Pará|Amazonas|Maranhão|Mato Grosso|Espírito Santo|Rio Grande do Norte|Alagoas|Sergipe|Piauí|Tocantins|Rondônia|Acre|Amapá|Roraima|Distrito Federal|SP|RJ|MG|BA|PR|RS|SC|GO|PE|CE|PA|AM|MA|MS|MT|ES|RN|AL|SE|PI|TO|RO|AC|AP|RR|DF))/);
-  return m ? `${m[1]}, ${m[2]}` : null;
+function parseIndeed(title, url, description, email, phone) {
+  const clean = title.replace(/\s*[-–|]\s*indeed.*$/i, '').trim();
+  const parts = clean.split(/\s*[-–]\s+/);
+  const name = parts[0]?.trim() || nameFromSlug(url);
+  const jobTitle = (parts[1] || '').trim();
+  const location = extractLocation(title + ' ' + description) || 'Brasil';
+  if (!name || name.length < 3) return null;
+  return { name, title: jobTitle, company: '', location, email, phone, url, platform: 'indeed', source: 'google-search' };
 }
 
-/**
- * Constrói queries por plataforma alvo
- */
-function buildQueries(query, location, platforms) {
+function parseCurriculum(title, url, description, email, phone) {
+  const clean = title.replace(/\s*[-–|]\s*(curriculum|currículo|curriculo).*$/i, '').trim();
+  const parts = clean.split(/\s*[-–]\s+/);
+  const name = parts[0]?.trim() || nameFromSlug(url);
+  const jobTitle = (parts[1] || '').trim();
+  const location = extractLocation(title + ' ' + description) || 'Brasil';
+  if (!name || name.length < 3) return null;
+  return { name, title: jobTitle, company: '', location, email, phone, url, platform: 'curriculo', source: 'google-search' };
+}
+
+function parseGeneric(title, url, description, email, phone) {
+  const clean = title.split(/\s*[|–-]\s*/)[0].trim();
+  if (!clean || clean.length < 3) return null;
+  const location = extractLocation(description) || 'Brasil';
+  return { name: clean, title: '', company: '', location, email, phone, url, platform: 'google', source: 'google-search' };
+}
+
+// ─── Query builder ───────────────────────────────────────────────────────────────────────────────
+
+export function buildQueries(query, location, platforms) {
   const city = location.split(',')[0].trim();
+  const all = !platforms.length;
   const queries = [];
 
-  if (platforms.includes('google') || platforms.includes('linkedin')) {
-    queries.push(`site:linkedin.com/in "${query}" "${city}"`);
-  }
-  if (platforms.includes('catho')) {
+  if (all || platforms.includes('catho')) {
     queries.push(`site:catho.com.br "${query}" "${city}"`);
   }
-  if (platforms.includes('indeed')) {
-    queries.push(`site:br.indeed.com "${query}" "${city}"`);
+  if (all || platforms.includes('vagas')) {
+    queries.push(`site:vagas.com.br "${query}" "${city}"`);
+  }
+  if (all || platforms.includes('indeed')) {
+    queries.push(`site:br.indeed.com/r "${query}" "${city}"`);
+  }
+  if (all || platforms.includes('curriculos')) {
+    queries.push(`"${query}" "${city}" currículo email telefone`);
+    queries.push(`"${query}" "${city}" "procurando emprego" OR "em busca de oportunidade"`);
   }
 
-  // Fallback: busca ampla se poucos resultados esperados
   if (!queries.length) {
-    queries.push(`site:linkedin.com/in "${query}" "${city}"`);
+    queries.push(`site:catho.com.br "${query}" "${city}"`);
   }
 
   return queries;
 }
 
-/**
- * Busca candidatos via Google Search actor
- */
-export async function searchGooglePeople(query, location, limit = 20, platforms = ['google', 'linkedin', 'indeed', 'catho']) {
+// ─── Main ─────────────────────────────────────────────────────────────────────────────────
+
+export async function searchGooglePeople(query, location, limit = 20, platforms = []) {
   const queries = buildQueries(query, location, platforms);
   const allCandidates = [];
   const seenUrls = new Set();
@@ -127,18 +158,17 @@ export async function searchGooglePeople(query, location, limit = 20, platforms 
     try {
       const run = await client.actor('nFJndFXA5zjCTuudP').call({
         queries: searchQuery,
-        maxPagesPerQuery: 2,
+        maxPagesPerQuery: 3,
         languageCode: 'pt-BR',
-        countryCode: 'br',  // lowercase obrigatório
-      }, { waitSecs: 90 });
+        countryCode: 'br',
+      }, { waitSecs: 120 });
 
-      const { items } = await client.dataset(run.defaultDatasetId).listItems({ limit: 50 });
+      const { items } = await client.dataset(run.defaultDatasetId).listItems({ limit: 100 });
 
-      // O actor retorna pages como items; cada page tem organicResults[]
       for (const item of items) {
         const results = item.organicResults || (item.url ? [item] : []);
         for (const result of results) {
-          const candidate = parseGoogleResult(result);
+          const candidate = parseResult(result);
           if (candidate && !seenUrls.has(candidate.url)) {
             seenUrls.add(candidate.url);
             allCandidates.push(candidate);

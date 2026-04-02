@@ -199,23 +199,25 @@ input, select, textarea { font: inherit; }
 .candidates-table tbody tr { transition: background var(--t-fast); }
 .candidates-table tbody tr:hover { background: var(--surface-hover); }
 .candidates-table tbody tr:hover .td-rank { color: var(--accent); }
-.th-rank { width: 40px; text-align: center; } .th-score { width: 82px; text-align: center; } .th-platform { width: 92px; text-align: center; } .th-profile { width: 58px; text-align: center; }
+.th-rank { width: 40px; text-align: center; }
+.th-score { width: 72px; text-align: center; }
+.th-city { width: 110px; }
+.th-email { width: 190px; }
+.th-phone { width: 130px; }
+.th-profile { width: 52px; text-align: center; }
 .td-rank { text-align: center; font-weight: 700; font-size: var(--text-xs); color: var(--text-faint); font-family: var(--font-mono); }
 .td-name { font-weight: 600; color: var(--text); }
-.td-title { color: var(--text-muted); font-size: var(--text-xs); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.td-company { font-size: var(--text-xs); color: var(--text-muted); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.td-location { font-size: var(--text-xs); color: var(--text-muted); white-space: nowrap; }
-.td-platform, .td-score, .td-profile { text-align: center; }
-.platform-tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: var(--r-sm); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-.platform-tag--linkedin { color: var(--p-linkedin); background: var(--p-linkedin-bg); }
-.platform-tag--indeed   { color: var(--p-indeed);   background: var(--p-indeed-bg); }
-.platform-tag--catho    { color: var(--p-catho);     background: var(--p-catho-bg); }
-.platform-tag--vagas    { color: var(--p-vagas);     background: var(--p-vagas-bg); }
-.platform-tag--google   { color: var(--p-google);    background: var(--p-google-bg); }
-.score-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; padding: 3px 8px; border-radius: var(--r-sm); font-size: var(--text-xs); font-weight: 700; font-family: var(--font-mono); }
+.td-title { color: var(--text-muted); font-size: var(--text-xs); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-city { font-size: var(--text-xs); color: var(--text-muted); white-space: nowrap; }
+.td-email, .td-phone { font-size: var(--text-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-score, .td-profile { text-align: center; }
+.score-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 3px 8px; border-radius: var(--r-sm); font-size: var(--text-xs); font-weight: 700; font-family: var(--font-mono); }
 .score-high { background: var(--score-high-bg); color: var(--score-high); }
 .score-mid  { background: var(--score-mid-bg);  color: var(--score-mid); }
 .score-low  { background: var(--score-low-bg);  color: var(--score-low); }
+.contact-link { color: var(--accent); transition: color var(--t-fast); }
+.contact-link:hover { color: var(--accent-2); text-decoration: underline; }
+.no-data { color: var(--text-faint); }
 .profile-link { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: var(--r-md); color: var(--accent); background: var(--accent-dim); transition: all var(--t-fast); }
 .profile-link:hover { background: var(--accent); color: white; box-shadow: var(--glow-sm); }
 
@@ -229,6 +231,6 @@ input, select, textarea { font: inherit; }
 
 /* RESPONSIVE */
 @media (max-width: 1100px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 768px) { body { overflow: auto; } .app-shell { flex-direction: column; height: auto; } .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); } .content-area { overflow: visible; } .topbar-center { display: none; } .brand { min-width: auto; } .table-container { margin: 0 var(--s4) var(--s6); overflow-x: auto; } .candidates-table { min-width: 660px; } .stats-bar { padding: var(--s4) var(--s4) 0; gap: var(--s3); } .results-header { padding: var(--s4); } .progress-panel { margin: var(--s4); } .welcome-state { padding: var(--s8) var(--s5); } }
+@media (max-width: 768px) { body { overflow: auto; } .app-shell { flex-direction: column; height: auto; } .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); } .content-area { overflow: visible; } .topbar-center { display: none; } .brand { min-width: auto; } .table-container { margin: 0 var(--s4) var(--s6); overflow-x: auto; } .candidates-table { min-width: 820px; } .stats-bar { padding: var(--s4) var(--s4) 0; gap: var(--s3); } .results-header { padding: var(--s4); } .progress-panel { margin: var(--s4); } .welcome-state { padding: var(--s8) var(--s5); } }
 @media (max-width: 480px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } .topbar-inner { padding: 0 var(--s4); gap: var(--s3); } .live-chip span:last-child { display: none; } .brand-powered { display: none; } }
 @media (prefers-color-scheme: dark) { :root:not([data-theme]) { --bg: #070b14; --surface: #0c1220; --surface-2: #0f1828; --surface-3: #141e30; --surface-hover: rgba(14,165,233,0.04); --border: rgba(14,165,233,0.10); --border-2: rgba(14,165,233,0.22); --text: #cdd6e4; --text-muted: #4a6a88; --text-faint: #1e3248; --accent: #0ea5e9; --accent-2: #38bdf8; --accent-dim: rgba(14,165,233,0.10); --score-high: #10b981; --score-high-bg: rgba(16,185,129,0.12); --score-mid: #f59e0b; --score-mid-bg: rgba(245,158,11,0.12); --score-low: #ef4444; --score-low-bg: rgba(239,68,68,0.12); --shadow-sm: 0 1px 3px rgba(0,0,0,0.4); --shadow-md: 0 4px 16px rgba(0,0,0,0.5); --glow-sm: 0 0 12px rgba(14,165,233,0.18); --p-linkedin: #0ea5e9; --p-linkedin-bg: rgba(14,165,233,0.10); --p-indeed: #60a5fa; --p-indeed-bg: rgba(96,165,250,0.10); --p-catho: #f87171; --p-catho-bg: rgba(248,113,113,0.10); --p-vagas: #fb923c; --p-vagas-bg: rgba(251,146,60,0.10); --p-google: #a78bfa; --p-google-bg: rgba(167,139,250,0.10); } }

@@ -1,63 +1,17 @@
 /**
- * Orchestrator — coordena busca por plataforma
+ * Orchestrator — busca candidatos ATIVOS em busca de emprego
  *
- * Estratégia unificada de custo mínimo:
- *   Google Search actor cobre LinkedIn, Catho, Indeed via queries específicas.
- *   Uma chamada por plataforma = custo ~$0.001 por query.
+ * Plataformas: Catho, Vagas.com, Indeed resumes, currículos públicos
+ * Foco em: pessoas cadastradas em plataformas de emprego com contato disponível
  */
 
 import { searchGooglePeople } from './google-people.js';
 import { scoreAndRank } from '../scoring/index.js';
 
-const JOB_CATEGORIES = {
-  blue_collar: [
-    'ajudante', 'auxiliar', 'operador', 'servente', 'pedreiro', 'eletricista',
-    'mecânico', 'motorista', 'entregador', 'estoquista', 'almoxarife',
-    'zelador', 'porteiro', 'vigia', 'segurança', 'faxineiro', 'limpeza',
-    'cozinheiro', 'copeiro', 'garçom', 'motoboy', 'office boy', 'soldador',
-    'pintor', 'carpinteiro', 'encanador', 'jardineiro', 'lavador',
-  ],
-  tech: [
-    'desenvolvedor', 'developer', 'engenheiro de software', 'programador',
-    'analista de sistemas', 'devops', 'data science', 'machine learning',
-    'frontend', 'backend', 'fullstack', 'mobile', 'qa engineer', 'ti',
-  ],
-  professional: [
-    'gerente', 'analista', 'coordenador', 'supervisor', 'diretor',
-    'consultor', 'especialista', 'contador', 'advogado', 'médico',
-    'enfermeiro', 'professor', 'arquiteto', 'engenheiro', 'rh',
-  ],
-  commercial: [
-    'vendedor', 'representante', 'consultor de vendas', 'promotor',
-    'atendente', 'recepcionista', 'telemarketing', 'sdr', 'closer',
-  ],
-};
-
-function detectCategory(query) {
-  const q = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  for (const [cat, keywords] of Object.entries(JOB_CATEGORIES)) {
-    if (keywords.some(k => q.includes(k.normalize('NFD').replace(/[\u0300-\u036f]/g, '')))) {
-      return cat;
-    }
-  }
-  return 'general';
-}
-
-/**
- * Plataformas por categoria (ordem de relevância)
- */
-const CATEGORY_PLATFORMS = {
-  blue_collar: ['google', 'catho', 'indeed'],
-  tech:        ['google', 'linkedin'],
-  professional:['google', 'linkedin', 'catho'],
-  commercial:  ['google', 'catho', 'indeed'],
-  general:     ['google', 'catho', 'indeed'],
-};
-
 function dedup(candidates) {
   const seen = new Set();
   return candidates.filter(c => {
-    const key = c.url || `${c.name?.toLowerCase()}|${c.title?.toLowerCase()}`;
+    const key = c.url || `${c.name?.toLowerCase()}|${c.email || ''}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
@@ -65,63 +19,61 @@ function dedup(candidates) {
 }
 
 export async function orchestrateSearch(query, location, requestedPlatforms, limit, onProgress) {
-  const category = detectCategory(query);
   const allCandidates = [];
 
-  // Determina quais plataformas usar
-  const platformPriority = CATEGORY_PLATFORMS[category] || CATEGORY_PLATFORMS.general;
-  const activePlatforms = requestedPlatforms.length
-    ? platformPriority.filter(p => requestedPlatforms.includes(p) || requestedPlatforms.includes('all'))
-    : platformPriority;
-
-  // Se "google" está ativo, cobre linkedin também
-  const effectivePlatforms = activePlatforms.includes('google') && !activePlatforms.includes('linkedin')
-    ? [...activePlatforms, 'linkedin']
-    : activePlatforms;
-
-  onProgress(5, `Detectado: ${category} — buscando em ${effectivePlatforms.length} plataformas...`);
-
-  // Busca paralela em grupos de plataformas
-  // LinkedIn via Google
-  if (effectivePlatforms.some(p => ['google', 'linkedin'].includes(p))) {
-    onProgress(15, 'Buscando perfis LinkedIn via Google...');
+  // Catho — principal plataforma de candidatos BR
+  if (!requestedPlatforms.length || requestedPlatforms.includes('catho')) {
+    onProgress(10, 'Buscando candidatos no Catho...');
     try {
-      const results = await searchGooglePeople(query, location, Math.ceil(limit * 0.5), ['linkedin']);
+      const results = await searchGooglePeople(query, location, Math.ceil(limit * 0.4), ['catho']);
       allCandidates.push(...results);
-      onProgress(35, `${results.length} perfis LinkedIn encontrados`);
-    } catch (err) {
-      console.error('[orchestrator] LinkedIn/Google error:', err.message);
-      onProgress(35, 'LinkedIn: erro, continuando...');
-    }
-  }
-
-  // Catho via Google
-  if (effectivePlatforms.includes('catho')) {
-    onProgress(45, 'Buscando perfis Catho...');
-    try {
-      const results = await searchGooglePeople(query, location, Math.ceil(limit * 0.3), ['catho']);
-      allCandidates.push(...results);
-      onProgress(65, `${results.length} perfis Catho encontrados`);
+      onProgress(30, `${results.length} candidatos Catho encontrados`);
     } catch (err) {
       console.error('[orchestrator] Catho error:', err.message);
-      onProgress(65, 'Catho: erro, continuando...');
+      onProgress(30, 'Catho: sem resultados, continuando...');
     }
   }
 
-  // Indeed via Google
-  if (effectivePlatforms.includes('indeed')) {
-    onProgress(70, 'Buscando perfis Indeed...');
+  // Vagas.com
+  if (!requestedPlatforms.length || requestedPlatforms.includes('vagas')) {
+    onProgress(35, 'Buscando candidatos no Vagas.com...');
+    try {
+      const results = await searchGooglePeople(query, location, Math.ceil(limit * 0.3), ['vagas']);
+      allCandidates.push(...results);
+      onProgress(55, `${results.length} candidatos Vagas.com encontrados`);
+    } catch (err) {
+      console.error('[orchestrator] Vagas error:', err.message);
+      onProgress(55, 'Vagas.com: sem resultados, continuando...');
+    }
+  }
+
+  // Indeed resumes
+  if (!requestedPlatforms.length || requestedPlatforms.includes('indeed')) {
+    onProgress(60, 'Buscando currículos no Indeed...');
     try {
       const results = await searchGooglePeople(query, location, Math.ceil(limit * 0.3), ['indeed']);
       allCandidates.push(...results);
-      onProgress(85, `${results.length} perfis Indeed encontrados`);
+      onProgress(75, `${results.length} currículos Indeed encontrados`);
     } catch (err) {
       console.error('[orchestrator] Indeed error:', err.message);
-      onProgress(85, 'Indeed: erro, continuando...');
+      onProgress(75, 'Indeed: sem resultados, continuando...');
     }
   }
 
-  onProgress(90, 'Deduplicando e pontuando candidatos...');
+  // Currículos públicos com contato
+  if (!requestedPlatforms.length || requestedPlatforms.includes('curriculos')) {
+    onProgress(78, 'Buscando currículos públicos com contato...');
+    try {
+      const results = await searchGooglePeople(query, location, Math.ceil(limit * 0.2), ['curriculos']);
+      allCandidates.push(...results);
+      onProgress(90, `${results.length} currículos públicos encontrados`);
+    } catch (err) {
+      console.error('[orchestrator] Curriculos error:', err.message);
+      onProgress(90, 'Currículos: sem resultados, finalizando...');
+    }
+  }
+
+  onProgress(95, 'Deduplicando e pontuando candidatos...');
   const deduped = dedup(allCandidates);
   const ranked = scoreAndRank(deduped, query, location);
 

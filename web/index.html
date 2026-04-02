@@ -29,13 +29,13 @@
 
       <div class="topbar-center">
         <nav class="source-nav">
-          <span class="source-tab source-tab--active">LinkedIn</span>
+          <span class="source-tab source-tab--active">Catho</span>
+          <span class="source-divider">·</span>
+          <span class="source-tab">Vagas.com</span>
           <span class="source-divider">·</span>
           <span class="source-tab">Indeed</span>
           <span class="source-divider">·</span>
-          <span class="source-tab">Catho</span>
-          <span class="source-divider">·</span>
-          <span class="source-tab">Vagas.com</span>
+          <span class="source-tab">Currículos</span>
         </nav>
       </div>
 
@@ -67,7 +67,7 @@
         <form class="search-form" id="searchForm" novalidate>
           <div class="form-field">
             <label class="form-label" for="queryInput">Cargo ou Perfil</label>
-            <input type="text" id="queryInput" class="field-input" placeholder="Ex: Desenvolvedor React..." autocomplete="off" required>
+            <input type="text" id="queryInput" class="field-input" placeholder="Ex: Ajudante de produção..." autocomplete="off" required>
           </div>
 
           <div class="form-field">
@@ -88,7 +88,6 @@
               <option value="Guarulhos, SP">
               <option value="São Bernardo do Campo, SP">
               <option value="Santo André, SP">
-              <option value="Mauá, SP">
               <option value="Osasco, SP">
               <option value="Ribeirão Preto, SP">
               <option value="Sorocaba, SP">
@@ -102,15 +101,12 @@
               <option value="Londrina, PR">
               <option value="Maringá, PR">
               <option value="Caxias do Sul, RS">
-              <option value="Pelotas, RS">
               <option value="Belém, PA">
               <option value="Goiânia, GO">
               <option value="Maceió, AL">
               <option value="Natal, RN">
-              <option value="Teresina, PI">
-              <option value="Campo Grande, MS">
               <option value="João Pessoa, PB">
-              <option value="Aracaju, SE">
+              <option value="Campo Grande, MS">
               <option value="Cuiabá, MT">
             </datalist>
           </div>
@@ -119,20 +115,20 @@
             <div class="form-label">Plataformas</div>
             <div class="platform-chips" id="platformChips">
               <label class="chip chip--active">
-                <input type="checkbox" name="platform" value="google" checked>
-                Google / LinkedIn
+                <input type="checkbox" name="platform" value="catho" checked>
+                Catho
+              </label>
+              <label class="chip chip--active">
+                <input type="checkbox" name="platform" value="vagas" checked>
+                Vagas.com
               </label>
               <label class="chip chip--active">
                 <input type="checkbox" name="platform" value="indeed" checked>
                 Indeed
               </label>
               <label class="chip chip--active">
-                <input type="checkbox" name="platform" value="catho" checked>
-                Catho
-              </label>
-              <label class="chip">
-                <input type="checkbox" name="platform" value="vagas">
-                Vagas.com
+                <input type="checkbox" name="platform" value="curriculos" checked>
+                Currículos
               </label>
             </div>
           </div>
@@ -163,7 +159,7 @@
         <div class="filter-wrap">
           <div class="form-field">
             <label class="form-label" for="searchInput">Buscar</label>
-            <input type="text" id="searchInput" class="field-input" placeholder="Nome, cargo ou empresa...">
+            <input type="text" id="searchInput" class="field-input" placeholder="Nome ou cargo...">
           </div>
           <div class="form-field">
             <label class="form-label">Score mínimo — <span id="scoreValue" class="accent-val">0</span></label>
@@ -206,12 +202,10 @@
               <circle cx="234" cy="325" r="2.5" fill="rgba(14,165,233,0.6)"/>
               <circle cx="264" cy="302" r="2" fill="rgba(14,165,233,0.5)"/>
               <circle cx="338" cy="196" r="2" fill="rgba(14,165,233,0.4)"/>
-              <circle cx="308" cy="168" r="2" fill="rgba(14,165,233,0.4)"/>
               <circle cx="186" cy="256" r="2" fill="rgba(14,165,233,0.4)"/>
               <circle cx="158" cy="416" r="2" fill="rgba(14,165,233,0.4)"/>
               <circle cx="84"  cy="130" r="2" fill="rgba(14,165,233,0.35)"/>
               <circle cx="200" cy="96"  r="2" fill="rgba(14,165,233,0.35)"/>
-              <circle cx="284" cy="282" r="2" fill="rgba(14,165,233,0.4)"/>
               <circle cx="200" cy="260" r="20" fill="rgba(14,165,233,0.08)" class="map-ping"/>
               <circle cx="200" cy="260" r="12" fill="rgba(14,165,233,0.12)"/>
               <circle cx="200" cy="260" r="6"  fill="rgba(14,165,233,0.5)"/>
@@ -219,15 +213,15 @@
             </svg>
           </div>
           <div class="welcome-copy">
-            <div class="welcome-label">BUSCA NACIONAL DE TALENTOS</div>
-            <h2 class="welcome-title">Encontre os melhores<br>candidatos do Brasil</h2>
-            <p class="welcome-desc">LinkedIn · Indeed · Catho · Vagas.com<br>Cobertura em 27 estados</p>
+            <div class="welcome-label">CANDIDATOS EM BUSCA DE EMPREGO</div>
+            <h2 class="welcome-title">Encontre candidatos ativos<br>com contato disponível</h2>
+            <p class="welcome-desc">Catho · Vagas.com · Indeed · Currículos Públicos<br>Email e telefone quando disponíveis</p>
           </div>
           <div class="source-badges">
-            <div class="source-badge"><div class="source-badge-name">LinkedIn</div><div class="source-badge-tag">PROFESSIONAL</div></div>
-            <div class="source-badge"><div class="source-badge-name">Indeed</div><div class="source-badge-tag">MASS MARKET</div></div>
             <div class="source-badge"><div class="source-badge-name">Catho</div><div class="source-badge-tag">BRASILEIRO</div></div>
-            <div class="source-badge"><div class="source-badge-name">Vagas</div><div class="source-badge-tag">LOCAL</div></div>
+            <div class="source-badge"><div class="source-badge-name">Vagas.com</div><div class="source-badge-tag">NACIONAL</div></div>
+            <div class="source-badge"><div class="source-badge-name">Indeed</div><div class="source-badge-tag">CURRÍCULOS</div></div>
+            <div class="source-badge"><div class="source-badge-name">Públicos</div><div class="source-badge-tag">COM CONTATO</div></div>
           </div>
         </div>
       </div>
@@ -277,9 +271,9 @@
               <th class="th-rank">#</th>
               <th class="th-name sortable" data-sort="name">Nome</th>
               <th class="th-title">Cargo</th>
-              <th class="th-company sortable" data-sort="company">Empresa</th>
-              <th class="th-location sortable" data-sort="location">Localização</th>
-              <th class="th-platform">Plataforma</th>
+              <th class="th-city">Cidade</th>
+              <th class="th-email">Email</th>
+              <th class="th-phone">Telefone</th>
               <th class="th-score sortable" data-sort="score">Score</th>
               <th class="th-profile">Perfil</th>
             </tr>

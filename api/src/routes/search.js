@@ -22,13 +22,13 @@ export async function searchRoutes(fastify) {
         properties: {
           query: { type: 'string', minLength: 2, maxLength: 100 },
           location: { type: 'string', minLength: 2, maxLength: 100 },
-          platforms: { type: 'array', items: { type: 'string' }, default: ['google', 'indeed', 'catho'] },
+          platforms: { type: 'array', items: { type: 'string' }, default: ['catho', 'vagas', 'indeed', 'curriculos'] },
           limit: { type: 'integer', minimum: 5, maximum: 100, default: 50 },
         },
       },
     },
   }, async (req, reply) => {
-    const { query, location, platforms = ['google', 'indeed', 'catho'], limit = 50 } = req.body;
+    const { query, location, platforms = ['catho', 'vagas', 'indeed', 'curriculos'], limit = 50 } = req.body;
 
     // Check cache first
     const cached = getCached(query, location, platforms);
@@ -71,7 +71,6 @@ export async function searchRoutes(fastify) {
       reply.raw.write(`data: ${JSON.stringify(data)}\n\n`);
     };
 
-    // Poll job status and stream updates
     let lastProgress = -1;
     const interval = setInterval(() => {
       const job = getJob(id);
@@ -134,21 +133,20 @@ export async function searchRoutes(fastify) {
     if (format === 'csv') {
       const csv = toCsv(results);
       reply.header('Content-Type', 'text/csv; charset=utf-8');
-      reply.header('Content-Disposition', `attachment; filename="candidatos-${job.query}-${Date.now()}.csv"`);
+      reply.header('Content-Disposition', `attachment; filename="candidatos-${job.query.replace(/[^a-z0-9]/gi, '-')}-${Date.now()}.csv"`);
       return reply.send('\uFEFF' + csv); // BOM for Excel UTF-8
     }
 
     return results;
   });
 
-  // GET /api/platforms — lista de plataformas disponíveis
+  // GET /api/platforms
   fastify.get('/api/platforms', async () => ({
     platforms: [
-      { id: 'google', label: 'Google/LinkedIn', description: 'Perfis LinkedIn via Google Search', cost: 'baixo' },
-      { id: 'indeed', label: 'Indeed', description: 'Currículos no Indeed Brasil', cost: 'médio' },
-      { id: 'catho', label: 'Catho', description: 'Banco de talentos Catho (blue-collar)', cost: 'zero' },
-      { id: 'vagas', label: 'Vagas.com', description: 'Candidatos no Vagas.com', cost: 'zero' },
-      { id: 'linkedin', label: 'LinkedIn Direct', description: 'Busca direta no LinkedIn', cost: 'alto' },
+      { id: 'catho',      label: 'Catho',      description: 'Candidatos cadastrados no Catho', cost: 'zero' },
+      { id: 'vagas',      label: 'Vagas.com',  description: 'Candidatos no Vagas.com', cost: 'zero' },
+      { id: 'indeed',     label: 'Indeed',     description: 'Currículos no Indeed Brasil', cost: 'médio' },
+      { id: 'curriculos', label: 'Currículos', description: 'Currículos públicos com contato', cost: 'zero' },
     ],
   }));
 }
@@ -162,7 +160,6 @@ async function runSearchAsync(jobId, query, location, platforms, limit) {
 
   const results = await orchestrateSearch(query, location, platforms, limit, onProgress);
 
-  // Cache results
   setCache(query, location, platforms, results);
 
   updateJob(jobId, {
@@ -174,13 +171,14 @@ async function runSearchAsync(jobId, query, location, platforms, limit) {
 }
 
 function toCsv(candidates) {
-  const headers = ['#', 'Nome', 'Cargo', 'Empresa', 'Localização', 'Pontuação', 'Plataforma', 'URL'];
+  const headers = ['#', 'Nome', 'Cargo', 'Cidade', 'Email', 'Telefone', 'Score', 'Plataforma', 'URL'];
   const rows = candidates.map((c, i) => [
     i + 1,
-    `"${(c.name || '').replace(/"/g, '""')}"`,
-    `"${(c.title || '').replace(/"/g, '""')}"`,
-    `"${(c.company || '').replace(/"/g, '""')}"`,
+    `"${(c.name     || '').replace(/"/g, '""')}"`,
+    `"${(c.title    || '').replace(/"/g, '""')}"`,
     `"${(c.location || '').replace(/"/g, '""')}"`,
+    `"${(c.email    || '').replace(/"/g, '""')}"`,
+    `"${(c.phone    || '').replace(/"/g, '""')}"`,
     c.score || 0,
     c.platform || '',
     c.url || '',
