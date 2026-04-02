@@ -1,12 +1,5 @@
 /**
  * Scoring engine — pontua candidatos por relevância.
- * Máximo teórico: 100 pts
- *
- * Critérios:
- *   Title match      0-50 pts
- *   Location match   0-25 pts
- *   Data quality     0-15 pts
- *   Platform trust   0-10 pts
  */
 
 const TITLE_NORMALIZATION = {
@@ -38,7 +31,7 @@ function scoreTitle(candidateTitle, searchQuery) {
   const ct = normalize(candidateTitle);
   const sq = normalize(searchQuery);
 
-  if (!ct) return 0;
+  if (!ct) return 10; // sem título = neutro
   if (ct === sq) return 50;
   if (ct.includes(sq)) return 45;
   if (sq.includes(ct)) return 40;
@@ -57,11 +50,11 @@ function scoreTitle(candidateTitle, searchQuery) {
     return Math.round(30 * (overlap / Math.max(sqWords.length, 1)));
   }
 
-  return 0;
+  return 10;
 }
 
 function scoreLocation(candidateLocation, searchLocation) {
-  if (!candidateLocation || !searchLocation) return 0;
+  if (!candidateLocation || !searchLocation) return 8;
 
   const cl = normalize(candidateLocation);
   const sl = normalize(searchLocation);
@@ -69,18 +62,21 @@ function scoreLocation(candidateLocation, searchLocation) {
   if (cl === sl) return 25;
   if (cl.includes(sl) || sl.includes(cl)) return 22;
 
-  const city = sl.split(',')[0].trim();
-  if (cl.includes(city)) return 20;
+  const searchCity = normalize(sl.split(',')[0].trim());
+  const candCity = normalize(cl.split(',')[0].trim());
 
-  const stateMatch = sl.match(/,\s*([A-Z]{2})$/);
+  if (cl.includes(searchCity) || candCity.includes(searchCity)) return 20;
+  if (searchCity.includes(candCity) && candCity.length > 3) return 18;
+
+  const stateMatch = sl.match(/,\s*([a-z]{2})$/i);
   if (stateMatch) {
-    const state = stateMatch[1].toLowerCase();
-    if (cl.includes(state)) return 10;
+    const state = normalize(stateMatch[1]);
+    if (cl.includes(state)) return 12;
   }
 
-  if (cl.includes('brasil') || cl.includes('brazil') || cl.includes(', sp') || cl.includes(', rj')) return 5;
+  if (cl.includes('brasil') || cl.includes('brazil')) return 8;
 
-  return 0;
+  return 5;
 }
 
 function scoreDataQuality(candidate) {
@@ -98,13 +94,12 @@ export function scoreCandidate(candidate, searchQuery, searchLocation) {
   const qualityScore = scoreDataQuality(candidate);
   const platformScore = PLATFORM_TRUST[candidate.platform] || 5;
 
-  const total = titleScore + locationScore + qualityScore + platformScore;
-  return Math.min(Math.round(total), 100);
+  return Math.min(Math.round(titleScore + locationScore + qualityScore + platformScore), 100);
 }
 
 export function scoreAndRank(candidates, searchQuery, searchLocation) {
   return candidates
     .map(c => ({ ...c, score: scoreCandidate(c, searchQuery, searchLocation) }))
-    .filter(c => c.score >= 30)
+    .filter(c => c.score >= 15)
     .sort((a, b) => b.score - a.score);
 }

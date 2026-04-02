@@ -14,31 +14,22 @@ const fastify = Fastify({
   logger: process.env.NODE_ENV !== 'production' ? { level: 'info' } : false,
 });
 
-// CORS
-await fastify.register(cors, {
-  origin: process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL || 'https://candidates.up.railway.app']
-    : true,
-});
+await fastify.register(cors, { origin: true });
 
-// Serve frontend static files
 const webDir = join(__dirname, '../../web');
 await fastify.register(staticFiles, {
   root: webDir,
   prefix: '/',
 });
 
-// API routes
 await fastify.register(searchRoutes);
 
-// Health check
 fastify.get('/health', async () => ({
   status: 'ok',
   version: '1.0.0',
   timestamp: new Date().toISOString(),
 }));
 
-// Start
 try {
   await fastify.listen({ port: PORT, host: HOST });
   console.log(`🚀 Candidates Platform API — http://localhost:${PORT}`);

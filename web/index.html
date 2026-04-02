@@ -38,11 +38,10 @@
 
   <main class="main">
 
-    <!-- Search Panel -->
     <section class="search-panel" id="searchPanel">
       <div class="search-hero">
         <h2 class="search-title">Encontre candidatos em qualquer nicho</h2>
-        <p class="search-sub">LinkedIn · Indeed · Catho · Vagas.com — cobertura nacional</p>
+        <p class="search-sub">LinkedIn · Catho · Indeed — cobertura nacional</p>
       </div>
 
       <form class="search-form" id="searchForm" novalidate>
@@ -52,29 +51,18 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               Cargo ou perfil
             </label>
-            <input
-              type="text"
-              id="queryInput"
-              class="field-input"
+            <input type="text" id="queryInput" class="field-input"
               placeholder="Ex: Ajudante Geral, Desenvolvedor React, Vendedor..."
-              autocomplete="off"
-              required
-            >
+              autocomplete="off" required>
           </div>
           <div class="search-field">
             <label class="field-label" for="locationInput">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
               Localização
             </label>
-            <input
-              type="text"
-              id="locationInput"
-              class="field-input"
-              placeholder="Ex: Mauá, SP ou São Paulo, SP"
-              autocomplete="off"
-              list="locationSuggestions"
-              value=""
-            >
+            <input type="text" id="locationInput" class="field-input"
+              placeholder="Ex: São Paulo, SP ou Mauá"
+              autocomplete="off" list="locationSuggestions">
             <datalist id="locationSuggestions">
               <option value="São Paulo, SP">
               <option value="Rio de Janeiro, RJ">
@@ -87,36 +75,71 @@
               <option value="Manaus, AM">
               <option value="Brasília, DF">
               <option value="Campinas, SP">
-              <option value="Mauá, SP">
-              <option value="Santo André, SP">
+              <option value="Guarulhos, SP">
               <option value="São Bernardo do Campo, SP">
+              <option value="Santo André, SP">
+              <option value="Mauá, SP">
+              <option value="Osasco, SP">
+              <option value="Ribeirão Preto, SP">
+              <option value="Sorocaba, SP">
+              <option value="São José dos Campos, SP">
+              <option value="Bauru, SP">
+              <option value="Jundiaí, SP">
+              <option value="Piracicaba, SP">
+              <option value="Santos, SP">
+              <option value="Diadema, SP">
+              <option value="Carapicuíba, SP">
+              <option value="Mogi das Cruzes, SP">
+              <option value="Sumaré, SP">
+              <option value="Betim, MG">
+              <option value="Contagem, MG">
+              <option value="Uberlândia, MG">
+              <option value="Juiz de Fora, MG">
+              <option value="Niterói, RJ">
+              <option value="Duque de Caxias, RJ">
+              <option value="Nova Iguaçu, RJ">
+              <option value="Belém, PA">
+              <option value="Goiânia, GO">
+              <option value="Maceió, AL">
+              <option value="Natal, RN">
+              <option value="Teresina, PI">
+              <option value="Campo Grande, MS">
+              <option value="João Pessoa, PB">
+              <option value="Aracaju, SE">
+              <option value="Porto Velho, RO">
+              <option value="Cuiabá, MT">
+              <option value="Macapá, AP">
+              <option value="Rio Branco, AC">
+              <option value="Boa Vista, RR">
+              <option value="Palmas, TO">
+              <option value="Florianópolis, SC">
+              <option value="Joinville, SC">
+              <option value="Blumenau, SC">
+              <option value="Londrina, PR">
+              <option value="Maringá, PR">
+              <option value="Caxias do Sul, RS">
+              <option value="Pelotas, RS">
             </datalist>
           </div>
         </div>
 
-        <!-- Platform Selector -->
         <div class="platform-selector">
           <span class="platform-label">Plataformas:</span>
           <div class="platform-chips" id="platformChips">
             <label class="chip chip--active">
               <input type="checkbox" name="platform" value="google" checked>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              Google/LinkedIn
-            </label>
-            <label class="chip chip--active">
-              <input type="checkbox" name="platform" value="indeed" checked>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-              Indeed
+              LinkedIn
             </label>
             <label class="chip chip--active">
               <input type="checkbox" name="platform" value="catho" checked>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               Catho
             </label>
-            <label class="chip">
-              <input type="checkbox" name="platform" value="vagas">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              Vagas.com
+            <label class="chip chip--active">
+              <input type="checkbox" name="platform" value="indeed" checked>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              Indeed
             </label>
           </div>
 
@@ -138,25 +161,19 @@
       </form>
     </section>
 
-    <!-- Progress -->
     <div class="progress-panel" id="progressPanel" style="display:none;">
       <div class="progress-inner">
         <div class="progress-icon" id="progressIcon">
-          <svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-          </svg>
+          <svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
         </div>
         <div class="progress-info">
           <div class="progress-message" id="progressMessage">Iniciando busca...</div>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar" id="progressBar" style="width:0%"></div>
-          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
           <div class="progress-pct" id="progressPct">0%</div>
         </div>
       </div>
     </div>
 
-    <!-- Results Header -->
     <div class="results-header" id="resultsHeader" style="display:none;">
       <div class="results-meta">
         <h3 class="results-title" id="resultsTitle">Resultados</h3>
@@ -174,7 +191,6 @@
       </div>
     </div>
 
-    <!-- Stats Bar -->
     <div class="stats-bar" id="statsBar" style="display:none;">
       <div class="stat"><span class="stat-value" id="totalCount">0</span><span class="stat-label">Total</span></div>
       <div class="stat"><span class="stat-value" id="filteredCount">0</span><span class="stat-label">Filtrados</span></div>
@@ -182,7 +198,6 @@
       <div class="stat"><span class="stat-value" id="topScore">—</span><span class="stat-label">Maior Pontuação</span></div>
     </div>
 
-    <!-- Filters -->
     <div class="filters-section" id="filtersSection" style="display:none;">
       <div class="filters-row">
         <div class="filter-group">
@@ -213,7 +228,6 @@
       <button class="clear-btn" id="clearFilters">Limpar Filtros</button>
     </div>
 
-    <!-- Table -->
     <div class="table-container" id="tableContainer" style="display:none;">
       <table class="candidates-table">
         <thead>
@@ -234,13 +248,13 @@
 
     <div class="empty-state" id="emptyState" style="display:none;">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <p>Nenhum candidato encontrado com os filtros atuais.</p>
+      <p>Nenhum candidato encontrado. Tente outros termos ou localização.</p>
     </div>
 
   </main>
 
   <footer class="footer">
-    <p>Claw Candidates — Dados coletados via Apify (LinkedIn · Indeed · Catho · Vagas.com)</p>
+    <p>Claw Candidates — Dados coletados via Apify (LinkedIn · Catho · Indeed)</p>
   </footer>
 
   <script src="app.js"></script>

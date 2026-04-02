@@ -1,37 +1,30 @@
 /**
- * Orchestrator — coordena actors por tipo de vaga e plataformas selecionadas
+ * Orchestrator — coordena busca por plataforma
  *
- * Estratégia de custo:
- *   1. Google People Search (SEMPRE — mais barato)
- *   2. Catho/Vagas HTTP direto (SEMPRE — custo zero)
- *   3. Indeed Actor (vagas industriais/operacionais)
- *   4. LinkedIn Direct (profissional/tech — mais caro, opcional)
- *
- * Detecção automática de categoria por palavras-chave no cargo
+ * Estratégia unificada de custo mínimo:
+ *   Google Search actor cobre LinkedIn, Catho, Indeed via queries específicas.
  */
 
 import { searchGooglePeople } from './google-people.js';
-import { searchIndeedResumes } from './indeed.js';
-import { searchCatho, searchVagas } from './catho.js';
 import { scoreAndRank } from '../scoring/index.js';
 
-// Categorias de vagas por palavras-chave
 const JOB_CATEGORIES = {
   blue_collar: [
     'ajudante', 'auxiliar', 'operador', 'servente', 'pedreiro', 'eletricista',
     'mecânico', 'motorista', 'entregador', 'estoquista', 'almoxarife',
     'zelador', 'porteiro', 'vigia', 'segurança', 'faxineiro', 'limpeza',
-    'cozinheiro', 'copeiro', 'garçom', 'motoboy', 'office boy',
+    'cozinheiro', 'copeiro', 'garçom', 'motoboy', 'office boy', 'soldador',
+    'pintor', 'carpinteiro', 'encanador', 'jardineiro', 'lavador',
   ],
   tech: [
     'desenvolvedor', 'developer', 'engenheiro de software', 'programador',
     'analista de sistemas', 'devops', 'data science', 'machine learning',
-    'frontend', 'backend', 'fullstack', 'mobile', 'qa engineer',
+    'frontend', 'backend', 'fullstack', 'mobile', 'qa engineer', 'ti',
   ],
   professional: [
     'gerente', 'analista', 'coordenador', 'supervisor', 'diretor',
     'consultor', 'especialista', 'contador', 'advogado', 'médico',
-    'enfermeiro', 'professor', 'arquiteto', 'engenheiro',
+    'enfermeiro', 'professor', 'arquiteto', 'engenheiro', 'rh',
   ],
   commercial: [
     'vendedor', 'representante', 'consultor de vendas', 'promotor',
@@ -49,106 +42,78 @@ function detectCategory(query) {
   return 'general';
 }
 
-/**
- * Deduplicação por nome+empresa (normalizado)
- */
+const CATEGORY_PLATFORMS = {
+  blue_collar: ['linkedin', 'catho', 'indeed'],
+  tech:        ['linkedin'],
+  professional:['linkedin', 'catho'],
+  commercial:  ['linkedin', 'catho', 'indeed'],
+  general:     ['linkedin', 'catho', 'indeed'],
+};
+
 function dedup(candidates) {
   const seen = new Set();
   return candidates.filter(c => {
-    const key = `${c.name?.toLowerCase().trim()}|${c.url || c.company?.toLowerCase().trim()}`;
+    const key = c.url || `${c.name?.toLowerCase()}|${c.title?.toLowerCase()}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
 }
 
-/**
- * Executa busca orquestrada
- * @param {string} query - cargo desejado
- * @param {string} location - cidade, estado
- * @param {string[]} platforms - ['google', 'linkedin', 'indeed', 'catho', 'vagas']
- * @param {number} limit - máximo de candidatos por plataforma
- * @param {Function} onProgress - callback(percent, message)
- */
-export async function orchestrateSearch(query, location, platforms, limit, onProgress) {
+export async function orchestrateSearch(query, location, requestedPlatforms, limit, onProgress) {
   const category = detectCategory(query);
   const allCandidates = [];
 
-  // Prioridade de platforms por categoria
-  const prioritized = prioritizePlatforms(platforms, category);
+  const platformPriority = CATEGORY_PLATFORMS[category] || CATEGORY_PLATFORMS.general;
+  const activePlatforms = requestedPlatforms.length
+    ? platformPriority.filter(p => requestedPlatforms.includes(p) || requestedPlatforms.includes('google') || requestedPlatforms.includes('all'))
+    : platformPriority;
 
-  let step = 0;
-  const totalSteps = prioritized.length;
+  onProgress(5, `Categoria: ${category} — plataformas: ${activePlatforms.join(', ')}`);
 
-  for (const platform of prioritized) {
-    step++;
-    const pct = Math.round((step / totalSteps) * 85);
-    onProgress(pct, `Buscando em ${platformLabel(platform)}...`);
-
+  // LinkedIn
+  if (activePlatforms.includes('linkedin') || requestedPlatforms.includes('google')) {
+    onProgress(15, 'Buscando perfis LinkedIn...');
     try {
-      let results = [];
-      const perPlatformLimit = Math.ceil(limit / totalSteps) + 5;
-
-      switch (platform) {
-        case 'google':
-          results = await searchGooglePeople(query, location, perPlatformLimit);
-          break;
-        case 'indeed':
-          results = await searchIndeedResumes(query, location, perPlatformLimit);
-          break;
-        case 'catho':
-          results = await searchCatho(query, location, perPlatformLimit);
-          break;
-        case 'vagas':
-          results = await searchVagas(query, location, perPlatformLimit);
-          break;
-        case 'linkedin':
-          // LinkedIn direct é caro — usar Google first, enrich depois se necessário
-          results = await searchGooglePeople(query + ' site:linkedin.com/in', location, perPlatformLimit);
-          break;
-      }
-
+      const results = await searchGooglePeople(query, location, Math.ceil(limit * 0.5), ['linkedin']);
       allCandidates.push(...results);
-      onProgress(pct, `${results.length} candidatos encontrados em ${platformLabel(platform)}`);
+      onProgress(40, `${results.length} perfis LinkedIn encontrados`);
     } catch (err) {
-      console.error(`[orchestrator] Error on ${platform}:`, err.message);
-      onProgress(pct, `Erro em ${platformLabel(platform)}, continuando...`);
+      console.error('[orchestrator] LinkedIn error:', err.message);
+      onProgress(40, 'LinkedIn: erro, continuando...');
     }
   }
 
-  onProgress(90, 'Deduplicando e pontuando candidatos...');
+  // Catho
+  if (activePlatforms.includes('catho') || requestedPlatforms.includes('catho')) {
+    onProgress(50, 'Buscando perfis Catho...');
+    try {
+      const results = await searchGooglePeople(query, location, Math.ceil(limit * 0.3), ['catho']);
+      allCandidates.push(...results);
+      onProgress(70, `${results.length} perfis Catho encontrados`);
+    } catch (err) {
+      console.error('[orchestrator] Catho error:', err.message);
+      onProgress(70, 'Catho: erro, continuando...');
+    }
+  }
 
+  // Indeed
+  if (activePlatforms.includes('indeed') || requestedPlatforms.includes('indeed')) {
+    onProgress(75, 'Buscando perfis Indeed...');
+    try {
+      const results = await searchGooglePeople(query, location, Math.ceil(limit * 0.3), ['indeed']);
+      allCandidates.push(...results);
+      onProgress(88, `${results.length} perfis Indeed encontrados`);
+    } catch (err) {
+      console.error('[orchestrator] Indeed error:', err.message);
+      onProgress(88, 'Indeed: erro, continuando...');
+    }
+  }
+
+  onProgress(92, 'Deduplicando e pontuando...');
   const deduped = dedup(allCandidates);
   const ranked = scoreAndRank(deduped, query, location);
 
-  onProgress(100, `${ranked.length} candidatos encontrados e rankeados`);
-
+  onProgress(100, `${ranked.length} candidatos encontrados`);
   return ranked.slice(0, limit);
-}
-
-function prioritizePlatforms(requested, category) {
-  const defaults = {
-    blue_collar: ['google', 'indeed', 'catho', 'vagas'],
-    tech: ['google', 'linkedin', 'indeed'],
-    professional: ['google', 'linkedin', 'indeed'],
-    commercial: ['google', 'indeed', 'catho'],
-    general: ['google', 'indeed', 'catho'],
-  };
-
-  const priority = defaults[category] || defaults.general;
-
-  // Filter to only requested platforms, keeping priority order
-  if (requested.includes('all') || !requested.length) return priority;
-  return priority.filter(p => requested.includes(p));
-}
-
-function platformLabel(platform) {
-  const labels = {
-    google: 'Google/LinkedIn',
-    linkedin: 'LinkedIn',
-    indeed: 'Indeed',
-    catho: 'Catho',
-    vagas: 'Vagas.com',
-  };
-  return labels[platform] || platform;
 }
