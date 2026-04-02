@@ -71,6 +71,7 @@ export async function searchRoutes(fastify) {
       reply.raw.write(`data: ${JSON.stringify(data)}\n\n`);
     };
 
+    // Poll job status and stream updates
     let lastProgress = -1;
     const interval = setInterval(() => {
       const job = getJob(id);
@@ -133,20 +134,22 @@ export async function searchRoutes(fastify) {
     if (format === 'csv') {
       const csv = toCsv(results);
       reply.header('Content-Type', 'text/csv; charset=utf-8');
-      reply.header('Content-Disposition', `attachment; filename="candidatos-${job.query.replace(/[^a-z0-9]/gi, '-')}-${Date.now()}.csv"`);
+      reply.header('Content-Disposition', `attachment; filename="candidatos-${job.query}-${Date.now()}.csv"`);
       return reply.send('\uFEFF' + csv); // BOM for Excel UTF-8
     }
 
     return results;
   });
 
-  // GET /api/platforms
+  // GET /api/platforms — lista de plataformas disponíveis
   fastify.get('/api/platforms', async () => ({
     platforms: [
-      { id: 'catho',      label: 'Catho',      description: 'Candidatos cadastrados no Catho', cost: 'zero' },
-      { id: 'vagas',      label: 'Vagas.com',  description: 'Candidatos no Vagas.com', cost: 'zero' },
-      { id: 'indeed',     label: 'Indeed',     description: 'Currículos no Indeed Brasil', cost: 'médio' },
-      { id: 'curriculos', label: 'Currículos', description: 'Currículos públicos com contato', cost: 'zero' },
+      { id: 'catho', label: 'Catho', description: 'Banco de candidatos Catho', cost: 'baixo' },
+      { id: 'vagas', label: 'Vagas.com', description: 'Candidatos no Vagas.com', cost: 'baixo' },
+      { id: 'indeed', label: 'Indeed', description: 'Currículos no Indeed Brasil', cost: 'baixo' },
+      { id: 'curriculos', label: 'Currículos', description: 'Currículos públicos com contato', cost: 'baixo' },
+      { id: 'facebook', label: 'Facebook', description: 'Grupos de vagas (requer cookie)', cost: 'médio' },
+      { id: 'instagram', label: 'Instagram', description: 'Hashtags #procurandoemprego', cost: 'médio' },
     ],
   }));
 }
@@ -160,6 +163,7 @@ async function runSearchAsync(jobId, query, location, platforms, limit) {
 
   const results = await orchestrateSearch(query, location, platforms, limit, onProgress);
 
+  // Cache results
   setCache(query, location, platforms, results);
 
   updateJob(jobId, {
@@ -171,14 +175,14 @@ async function runSearchAsync(jobId, query, location, platforms, limit) {
 }
 
 function toCsv(candidates) {
-  const headers = ['#', 'Nome', 'Cargo', 'Cidade', 'Email', 'Telefone', 'Score', 'Plataforma', 'URL'];
+  const headers = ['#', 'Nome', 'Cargo', 'Localização', 'Email', 'Telefone', 'Score', 'Plataforma', 'URL'];
   const rows = candidates.map((c, i) => [
     i + 1,
-    `"${(c.name     || '').replace(/"/g, '""')}"`,
-    `"${(c.title    || '').replace(/"/g, '""')}"`,
+    `"${(c.name || '').replace(/"/g, '""')}"`,
+    `"${(c.title || '').replace(/"/g, '""')}"`,
     `"${(c.location || '').replace(/"/g, '""')}"`,
-    `"${(c.email    || '').replace(/"/g, '""')}"`,
-    `"${(c.phone    || '').replace(/"/g, '""')}"`,
+    `"${(c.email || '').replace(/"/g, '""')}"`,
+    `"${(c.phone || '').replace(/"/g, '""')}"`,
     c.score || 0,
     c.platform || '',
     c.url || '',
