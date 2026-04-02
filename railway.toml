@@ -1,0 +1,17 @@
+[build]
+builder = "nixpacks"
+buildCommand = "cd api && npm install"
+
+[deploy]
+startCommand = "cd api && npm start"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[[services]]
+name = "candidates-platform"
+
+[services.variables]
+PORT = "3001"
+NODE_ENV = "production"
